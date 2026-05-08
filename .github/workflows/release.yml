@@ -1,4 +1,4 @@
-name: Build and Release
+name: Release Browser Extension
 
 on:
   push:
@@ -14,21 +14,34 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # 你的构建步骤
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # 按项目实际构建命令替换；产物必须输出到 dist/ 且根含 manifest.json
       - name: Build
+        run: npm run build
+
+      # 打包：解压后根就是 manifest.json，不是 dist/manifest.json
+      - name: Package Extension
         run: |
-          npm install
-          npm run build
-          
+          cd dist
+          zip -r ../my-extension-${{ github.ref_name }}.zip .
+
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: 'dist/*'   # 指向最终发布产物
+          subject-path: '*.zip'
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: '*.zip'
           generate_release_notes: true
