@@ -18,9 +18,8 @@ jobs:
 
       # 你的构建步骤
       - name: Build
-        run: |
-          # 构建命令
-
+        run: npm run build
+          
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
